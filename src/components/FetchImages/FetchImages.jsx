@@ -1,21 +1,25 @@
 import { Component } from 'react';
+// import PropTypes from 'prop-types';
+import fetchImages from '../../services/Api';
+import ImageGallery from '../ImageGallery/ImageGallery';
 
 export default class ImageGalleryInfo extends Component {
   state = {
-    hits: null,
+    images: [],
     loading: false,
+    error: null,
+    page: 1,
   };
+
   componentDidUpdate(prevProps, nextState) {
     const prevQuery = prevProps.query;
     const nextQuery = this.props.query;
     if (prevQuery !== nextQuery) {
       console.log('изменилось вводимое имя картинки');
       this.setState({ loading: true });
-      fetch(
-        `https://pixabay.com/api/?q=${nextQuery}&page=1&key=19112530-d5af3423794dd47ca2e19dee1&image_type=photo&orientation=horizontal&per_page=12`
-      )
-        .then((response) => response.json())
-        .then((hits) => this.setState([hits]))
+      fetchImages(prevQuery, nextQuery)
+        .then((images) => this.setState({ images }))
+        .catch((error) => this.setState({ error }))
         .finally(() => this.setState({ loading: false }));
       console.log(nextQuery);
     }
@@ -24,11 +28,14 @@ export default class ImageGalleryInfo extends Component {
   render() {
     const { hits, loading } = this.state;
     const { query } = this.props;
+    const { error } = this.state;
     return (
       <div>
+        {error && <h1>{error.message}</h1>}
         {loading && <div>Loading...</div>}
         {!query && <div>Please enter search item</div>}
         {hits && <div>{this.state.hits}</div>}
+        <ImageGallery images={this.state.images} />
       </div>
     );
   }
