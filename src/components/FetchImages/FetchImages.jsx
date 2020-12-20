@@ -3,25 +3,37 @@ import { Component } from 'react';
 import fetchImages from '../../services/Api';
 import ImageGallery from '../ImageGallery/ImageGallery';
 
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
+
 export default class ImageGalleryInfo extends Component {
   state = {
     images: [],
     loading: false,
     error: null,
     page: 1,
+    // status: Status.IDLE,
   };
 
-  componentDidUpdate(prevProps, nextState) {
+  componentDidUpdate(prevProps, prevState) {
     const prevQuery = prevProps.query;
     const nextQuery = this.props.query;
+
     if (prevQuery !== nextQuery) {
       console.log('изменилось вводимое имя картинки');
-      this.setState({ loading: true });
-      fetchImages(prevQuery, nextQuery)
-        .then((images) => this.setState({ images }))
-        .catch((error) => this.setState({ error }))
-        .finally(() => this.setState({ loading: false }));
-      console.log(nextQuery);
+      this.setState({ status: Status.PENDING });
+
+      setTimeout(() => {
+        fetchImages(nextQuery)
+          .then((images) => this.setState({ images }))
+          .catch((error) => this.setState({ error }))
+          .finally(() => this.setState({ loading: false }));
+        console.log(nextQuery);
+      }, 3000);
     }
   }
 
