@@ -205,3 +205,17 @@ img {
 .Button:focus {
   background-color: #303f9f;
 }
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+}
+
+.load__button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 10vh;
+}

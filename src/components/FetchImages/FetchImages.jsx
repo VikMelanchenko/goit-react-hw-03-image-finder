@@ -1,54 +1,107 @@
-import { Component } from 'react';
-// import PropTypes from 'prop-types';
-import fetchImages from '../../services/Api';
+import React, { Component } from 'react';
+import Spinner from '../Loader/Loader';
+import API from '../../services/Api';
+import Button from '../Button/Button';
 import ImageGallery from '../ImageGallery/ImageGallery';
-
-const Status = {
-  IDLE: 'idle',
-  PENDING: 'pending',
-  RESOLVED: 'resolved',
-  REJECTED: 'rejected',
-};
+import ImageErrorView from '../ImageErrorView/ImageErrorView';
+import PropTypes from 'prop-types';
+import '../css/styles.css';
 
 export default class ImageGalleryInfo extends Component {
   state = {
     images: [],
-    loading: false,
+    status: 'idle',
     error: null,
     page: 1,
-    // status: Status.IDLE,
+  };
+
+  static propTypes = {
+    query: PropTypes.string,
   };
 
   componentDidUpdate(prevProps, prevState) {
     const prevQuery = prevProps.query;
     const nextQuery = this.props.query;
 
+    // обновляет поиск при вводенового значения в input + обновляет поиск с первой страницы
     if (prevQuery !== nextQuery) {
-      console.log('изменилось вводимое имя картинки');
-      this.setState({ status: Status.PENDING });
+      this.setState({ page: 1, images: [] });
+    }
 
-      setTimeout(() => {
-        fetchImages(nextQuery)
-          .then((images) => this.setState({ images }))
-          .catch((error) => this.setState({ error }))
-          .finally(() => this.setState({ loading: false }));
-        console.log(nextQuery);
-      }, 3000);
+    // статус ожидает + спиннер
+    if (prevQuery !== nextQuery) {
+      this.setState({ status: 'pending' });
+
+      this.fetchImagesGallery();
+    }
+
+    // scroll вниз
+    if (prevState.page !== this.state.page) {
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: 'smooth',
+      });
     }
   }
 
+  fetchImagesGallery = () => {
+    const nextQuery = this.props.query;
+
+    API.fetchImages(nextQuery, this.state.page)
+      .then((newImages) => {
+        if (newImages.total !== 0) {
+          this.setState((prevState) => ({
+            images: [...prevState.images, ...newImages.hits],
+            page: this.state.page + 1,
+            status: 'resolved',
+          }));
+          return;
+        }
+        return Promise.reject(
+          new Error('Hmm...Nothing here. Try another search.')
+        );
+      })
+      .catch((error) => this.setState({ error, status: 'rejected' }));
+  };
+
+  onLoadMore = () => {
+    this.fetchImagesGallery();
+  };
+
   render() {
-    const { hits, loading } = this.state;
-    const { query } = this.props;
-    const { error } = this.state;
-    return (
-      <div>
-        {error && <h1>{error.message}</h1>}
-        {loading && <div>Loading...</div>}
-        {!query && <div>Please enter search item</div>}
-        {hits && <div>{this.state.hits}</div>}
-        <ImageGallery images={this.state.images} />
-      </div>
-    );
+    const { images, status, error } = this.state;
+    if (status === 'idle') {
+      return (
+        <div style={{ textAlign: 'center' }}> Please enter search item</div>
+      );
+    }
+
+    if (status === 'pending') {
+      return <Spinner />;
+    }
+
+    if (status === 'rejected') {
+      return <ImageErrorView message={error.message} />;
+    }
+
+    if (status === 'resolved') {
+      return (
+        <>
+          <ImageGallery images={images} />
+          <Button onClick={this.onLoadMore} />
+        </>
+      );
+    }
+    //   return (
+    //     <div>
+    //       {error && <h1>{error.message}</h1>}
+    //       {loading && <Spinner className="spinner" />}
+    //       {!query && <div> Please enter search item</div>}
+    //       {hits && <div>{hits}</div>}
+    //       <ImageGallery images={images} loadMore={OnLoadMore} />
+    //       {loadMoreButton && <Button onClick={this.onLoadMore} />}
+    //     </div>
+    //   );
+    // }
   }
 }

@@ -1,10 +1,15 @@
 import { Component } from 'react';
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
+import PropTypes from 'prop-types';
 import '../css/styles.css';
 
 export default class SearchForm extends Component {
   state = {
     query: '',
+  };
+
+  static propTypes = {
+    onSubmit: PropTypes.func,
   };
 
   // добавление значения в input
@@ -19,7 +24,7 @@ export default class SearchForm extends Component {
 
     //   проверка на пусту строку и вызов алерта
     if (this.state.query.trim() === '') {
-      alert('Please enter your search item');
+      toast.error('Please enter your search item');
     }
     this.props.onSubmit(this.state.query);
 
