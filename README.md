@@ -1,12 +1,12 @@
 Image search app
 
 Such components are created
-- <Searchbar>;
-- <ImageGallery>;
-- <ImageGalleryItem>;
-- <Loader>;
-- <Button>;
-- <Modal>.
+- Searchbar;
+- ImageGallery;
+- ImageGalleryItem;
+- Loader;
+- Button;
+- Modal.
   
 
 Pixabay public image search service was used for HTTP requests. 
