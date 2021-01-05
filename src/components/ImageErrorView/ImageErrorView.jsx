@@ -1,4 +1,4 @@
-import errorImage from '../404-pages.jpg';
+import errorImage from '../panda-dribble_4x.webp';
 import '../css/styles.css';
 
 export default function ImageFallbackView({ message }) {

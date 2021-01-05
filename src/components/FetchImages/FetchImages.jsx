@@ -49,17 +49,14 @@ export default class ImageGalleryInfo extends Component {
 
     API.fetchImages(nextQuery, this.state.page)
       .then((newImages) => {
-        if (newImages.total !== 0) {
-          this.setState((prevState) => ({
-            images: [...prevState.images, ...newImages.hits],
-            page: this.state.page + 1,
-            status: 'resolved',
-          }));
-          return;
+        this.setState((prevState) => ({
+          images: [...prevState.images, ...newImages],
+          page: this.state.page + 1,
+          status: 'resolved',
+        }));
+        if (newImages.length === 0) {
+          throw new Error('Hmm...Nothing here. Try another search.');
         }
-        return Promise.reject(
-          new Error('Hmm...Nothing here. Try another search.')
-        );
       })
       .catch((error) => this.setState({ error, status: 'rejected' }));
   };
